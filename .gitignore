@@ -1,0 +1,10 @@
+**/data/
+/output
+/tmp
+/model_archive
+**/.idea
+*__pycache__
+logfile*
+*.pt
+*.tif
+/runs
