@@ -7,4 +7,6 @@
 logfile*
 *.pt
 *.tif
+*.png
+*.csv
 /runs

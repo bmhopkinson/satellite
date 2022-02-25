@@ -5,7 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
-mosaic_file = 'temp2.tif' #"./data/20210714_16/20210714_151559_25_241f_3B_udm2_clip.tif"#
+#mosaic_file = './data/composites/20211206_mosaic.tif'#'mosaic_jan_backup.tif' #"./data/20210714_16/20210714_151559_25_241f_3B_udm2_clip.tif"#
+mosaic_file = './data/20210104/20210104_162503_21_1059_3B_AnalyticMS_SR_clip.tif'
 
 class MidpointNormalize(colors.Normalize):
     """
@@ -25,16 +26,19 @@ class MidpointNormalize(colors.Normalize):
 with rasterio.open(mosaic_file) as src:
     mosaic = src.read()
 
-band_data = mosaic[3, :, :]
+band_data = mosaic[1, :, :]
 band_data = np.divide(band_data.astype(np.float32), 10000)
 
 mid = 0.1
 min_sr = np.nanmin(band_data)
 max_sr = np.nanmax(band_data)
-fig = plt.figure(figsize=(10,10))
+min_manual = 0.0
+max_manual = 0.3
+fig = plt.figure(figsize=(6, 10))
 ax = fig.add_subplot(1, 1, 1)
 cmap = plt.cm.get_cmap('RdGy_r')
-cax = ax.imshow(band_data, cmap=cmap, clim=(min_sr, max_sr),
-                norm=MidpointNormalize(midpoint=mid, vmin=min_sr, vmax=max_sr))
+cax = ax.imshow(band_data, cmap=cmap, clim=(min_manual, max_manual),
+                norm=MidpointNormalize(midpoint=mid, vmin=min_manual, vmax=max_manual))
 cbar = fig.colorbar(cax, orientation='horizontal', shrink=0.65)
+plt.savefig('mosaic_green.png', dpi=300)
 plt.show()
