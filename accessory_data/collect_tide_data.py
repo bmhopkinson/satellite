@@ -6,6 +6,7 @@ station_id = '8675761'
 year = 2021
 
 def fetch_NOAA_tide_data(begin_date, begin_time, end_date, end_time, station_id):
+    #max data that can be requested for 6 min tide data is 31 days
     #fetch xml data from NOAA - csv would probably be fine for this data, but use xml to keep more generally applicable
     url_template = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?' \
                    'begin_date={}%20{}&end_date={}%20{}&station={}' \
