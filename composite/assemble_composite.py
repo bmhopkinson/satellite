@@ -5,13 +5,14 @@ import numpy as np
 import re
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
-input_dir = './data/20211206/'#'./data/20210104/'
+input_dir = '../data/Sapelo_2021_01-02_focus/Sapelo_20210104_psscene_analytic_sr_udm2/files/'#'./data/20210104/'
 mosaic_name = 'mosaic.tif'
 mask_baddata = True
 write_mosaic = True
 
 udm_suffix = '_udm2_clip.tif'
-sr_img_re = re.compile('(.*)_AnalyticMS_SR_clip.tif')
+sr_img_re = re.compile('(.*)_AnalyticMS_SR_clip.tif|(.*)_AnalyticMS_SR_harmonized_clip.tif')
+dot_firstchar = re.compile(r'^\.')  #used to ignore hidden files
 
 temp_dir = './temp/'
 if not os.path.exists(temp_dir):
@@ -50,7 +51,7 @@ for file in os.listdir(input_dir):
     #base, ext = os.path.splitext(file)
     m = sr_img_re.match(file)
     #if ext == '.tif':
-    if m:
+    if m and not dot_firstchar.search(file):
         full_path = os.path.join(input_dir, file)
         fhandle = rasterio.open(full_path)
         imgs_to_merge[full_path] = fhandle
@@ -60,9 +61,13 @@ profile = imgs_to_merge[list(imgs_to_merge.keys())[0]].profile
 if mask_baddata:
     temp_id = 0
     for sr_img in list(imgs_to_merge.keys()):  #need to create list of keys b/c we're going to modify the dict
-        m = sr_img_re.match(sr_img)
+        m = sr_img_re.search(sr_img)
         if m:
-            udm_file = m[1] + udm_suffix
+            for i in range(1, len(m.regs)):  #multiple possible match patterns, must find the correct one
+                if m[i] is not None:
+                    udm_file = m[i] + udm_suffix
+
+
             if os.path.exists(udm_file):
                 print('found udm: {}'.format(udm_file))
                 with rasterio.open(udm_file) as mask_handle:
