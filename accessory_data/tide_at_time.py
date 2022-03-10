@@ -8,7 +8,7 @@ import pandas as pd
 tide_data_file = 'tide_data_station_8675761_year_2021.csv'
 #test_meta = '20210104_154923_0f4e_metadata.json'
 #folder = '../data/Sapelo_2021/Sapelo_20210104_psscene4band_analytic_sr_udm2/files/'
-base_folder = '../data/Sapelo_2021_01-02_focus/'
+base_folder = '../data/Sapelo_2021/'
 data_subdir ='files'
 
 dot_firstchar = re.compile(r'^\.')  #used to ignore hidden files
@@ -96,6 +96,6 @@ if __name__ == "__main__":
     sort_key = lambda x : pd.to_datetime(x['acquisition_time'])  #seemed to work without conversion to python's built in datetime but safer to do so
     tides_to_satellite.sort(key=sort_key)
 
-    write_matched_data(tides_to_satellite,'test_out.txt')
+    write_matched_data(tides_to_satellite,'tide_at_time_data.txt')
 
     print('hello')
