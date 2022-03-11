@@ -54,8 +54,8 @@ lat_bounds = [3464775, 3490026]  # EPSG:32167 coordinates, meters
 lon_bounds = [459516, 483600]  # EPSG:32167 coordinates, meters
 lat_patch_radius = 2  # pixels NOT meters
 lon_patch_radius = 2  # pixels NOT meters
-lat_spacing = 300  # meters
-lon_spacing = 300  # meters
+lat_spacing = 30  # meters
+lon_spacing = 30  # meters
 
 patch_extractor = PatchExtractor()
 patch_extractor.define_patch_grid(lat_bounds, lon_bounds, lat_spacing, lon_spacing, lat_patch_radius, lon_patch_radius)
