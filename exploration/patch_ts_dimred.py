@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from sklearn.impute import SimpleImputer
+from sklearn.impute import SimpleImputer, KNNImputer
 
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -12,8 +12,11 @@ import umap
 
 import matplotlib.pyplot as plt
 import matplotlib
+import time
 
 infile = 'patch_average_ts_30m.txt'
+n_per_timepoint = 4
+imputer_choice = 'Simple' # 'Simple' or 'KNN' - KNN takes much longer
 cluster_alg_choice = 'KMeans'  #DBSCAN, KMeans, OPTICS, Spectral
 embed_choice = 'UMAP'
 cmap = plt.get_cmap('turbo')  #'gist_ncar' is a little wild but good for distinguishing lots of clusters,
@@ -29,15 +32,27 @@ names = names1 + names2
 df.columns = names
 
 #cleaning and imputation
-df = df.dropna(thresh=n_timepts)  #if no timeseries data (only lat,lon) drop it
+n_nans_to_drop = int(0.5*n_timepts*n_per_timepoint)  #if nans exceed half of the timeseries -> drop row
+df = df.dropna(thresh=n_nans_to_drop)
 ts_data = df.iloc[:, 2:].to_numpy(copy=True)  #drop
+print('number of points that need to be imputed: {}'.format(np.count_nonzero(np.isnan(ts_data))))
 
-imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
+if imputer_choice == 'Simple':
+    imputer = SimpleImputer(strategy='mean', missing_values=np.nan)
+elif imputer_choice == 'KNN':
+    imputer = KNNImputer(n_neighbors=5, weights='uniform', missing_values=np.nan)
+else:
+    raise NotImplementedError
+
+t_start = time.time()
 ts_data = imputer.fit_transform(ts_data)
+t_stop = time.time()
+del_t= t_stop - t_start
+print('time required for imputation: {}'.format(del_t))
 
 # Dimensionality reduction via PCA
 scaler = StandardScaler()
-pca = PCA(n_components=10)
+pca = PCA(n_components=4)
 X = scaler.fit_transform(ts_data)
 pca.fit(X)
 
@@ -76,11 +91,12 @@ cmap, norm = matplotlib.colors.from_levels_and_colors(intervals, colors)
 
 #plot clusters in physical space
 fig, ax = plt.subplots(1, 1)
-scatter_data = ax.scatter(df['lon'], df['lat'], s=0.5, c=cluster_ids, cmap=cmap, norm=norm, marker='.', alpha=0.5)
+scatter_data = ax.scatter(df['lon'], df['lat'], s=0.2, c=cluster_ids, cmap=cmap,
+                          norm=norm, marker='o', linewidth=0, alpha=1.0)
 ax.legend(*scatter_data.legend_elements(), fontsize='xx-small')
 ax.set_aspect('equal', 'box')
 
-plt.savefig('satellite_ts_clusters_physical_space.jpg', dpi=600)
+plt.savefig('satellite_ts_clusters_physical_space.png', dpi=600)
 
 # embed in low dimension for visualization
 if embed_choice == 'tSNE':
